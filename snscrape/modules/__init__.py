@@ -5,14 +5,14 @@ __all__ = []
 
 
 def _import_modules():
-	prefixLen = len(__name__) + 1
-	for importer, moduleName, isPkg in pkgutil.iter_modules(__path__, prefix = f'{__name__}.'):
-		assert not isPkg
-		moduleNameWithoutPrefix = moduleName[prefixLen:]
-		__all__.append(moduleNameWithoutPrefix)
-		module = importer.find_module(moduleName).load_module(moduleName)
-		module = importlib.import_module(moduleName)
-		globals()[moduleNameWithoutPrefix] = module
+    prefixLen = len(__name__) + 1
+    for _, moduleName, isPkg in pkgutil.iter_modules(__path__, prefix=f'{__name__}.'):
+        if isPkg:
+            continue
+        moduleNameWithoutPrefix = moduleName[prefixLen:]
+        __all__.append(moduleNameWithoutPrefix)
+        module = importlib.import_module(moduleName)
+        globals()[moduleNameWithoutPrefix] = module
 
 
 _import_modules()
