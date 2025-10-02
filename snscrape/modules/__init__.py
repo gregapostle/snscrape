@@ -1,21 +1,18 @@
 import pkgutil
-
+import importlib
 
 __all__ = []
 
 
 def _import_modules():
-    import importlib
-    import importlib.util
-    import pkgutil
-
-    for finder, moduleName, ispkg in pkgutil.iter_modules(__path__):
-        spec = importlib.util.find_spec(f'{__name__}.{moduleName}')
-        if spec is None:
-            continue
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        globals()[moduleName] = module
+	prefixLen = len(__name__) + 1
+	for importer, moduleName, isPkg in pkgutil.iter_modules(__path__, prefix = f'{__name__}.'):
+		assert not isPkg
+		moduleNameWithoutPrefix = moduleName[prefixLen:]
+		__all__.append(moduleNameWithoutPrefix)
+		module = importer.find_module(moduleName).load_module(moduleName)
+		module = importlib.import_module(moduleName)
+		globals()[moduleNameWithoutPrefix] = module
 
 
 _import_modules()
